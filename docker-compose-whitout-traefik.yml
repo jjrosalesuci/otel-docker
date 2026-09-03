@@ -1,0 +1,75 @@
+services:
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./observability/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - observability
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-remote-write-receiver'
+    ports:
+      - "9090:9090"
+    networks:
+      - observability
+
+  loki:
+    image: grafana/loki:latest
+    volumes:
+      - ./observability/loki-config.yml:/etc/loki/local-config.yaml
+      - loki_data:/tmp/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    networks:
+      - observability
+
+  tempo-app:
+    image: grafana/tempo:2.7.0
+    user: root
+    volumes:
+      - ./observability/tempo-config.yml:/etc/tempo/tempo-config.yaml
+      - tempo_data:/var/lib/tempo
+    command: -config.file=/etc/tempo/tempo-config.yaml
+    ports:
+      - "3200:3200" # HTTP
+      - "4320:4317" # OTLP gRPC (Host 4320 -> Container 4317)
+    networks:
+      - observability
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    volumes:
+      - ./observability/otel-config.yaml:/etc/otelcol-contrib/config.yaml
+    command: --config /etc/otelcol-contrib/config.yaml
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "8889:8889" # Prometheus exporter metrics
+    networks:
+      - observability
+    depends_on:
+      - prometheus
+      - loki
+      - tempo-app
+
+networks:
+  observability:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  loki_data:
+  tempo_data:
+  mysql_data:
