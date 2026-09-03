@@ -26,6 +26,7 @@ services:
 
   loki:
     image: grafana/loki:latest
+    user: root
     volumes:
       - ./observability/loki-config.yml:/etc/loki/local-config.yaml
       - loki_data:/tmp/loki

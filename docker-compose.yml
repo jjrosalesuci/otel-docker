@@ -21,6 +21,7 @@ services:
       - "traefik.http.routers.grafana.rule=Host(`grafana.aseresoft.com`)"
       - "traefik.http.routers.grafana.entrypoints=websecure"
       - "traefik.http.routers.grafana.tls=true"
+      - "traefik.docker.network=proxy"
 
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
 
@@ -54,6 +55,8 @@ services:
     image: grafana/loki:latest
     container_name: loki
 
+    user: root
+
     volumes:
       - ./observability/loki-config.yml:/etc/loki/local-config.yaml:ro
       - loki_data:/tmp/loki
@@ -65,7 +68,6 @@ services:
       - observability
 
     restart: unless-stopped
-
 
   tempo-app:
     image: grafana/tempo:2.7.0

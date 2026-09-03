@@ -6,19 +6,24 @@ Este proyecto incluye una pila completa de observabilidad basada en Docker para 
 
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/) o Colima/Docker Desktop.
+- En el despliegue con Traefik, la red externa `proxy` debe existir y Traefik debe estar conectado a ella:
+
+	```bash
+	docker network create proxy
+	```
 
 ## 🛠️ Cómo Iniciar el Stack
 
 Para levantar todos los servicios en segundo plano, ejecuta el siguiente comando en la raíz del proyecto:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 Para verificar que todos los contenedores están corriendo:
 
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
 ## 🌐 Accesos y Credenciales
@@ -66,11 +71,11 @@ O si usas **GoLand**, utiliza la configuración de ejecución **"Run Local"** qu
 Para detener y eliminar los contenedores:
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 Para re-crear todo ante un cambio de configuración:
 
 ```bash
-docker-compose down && docker-compose up -d
+docker compose down && docker compose up -d
 ```
